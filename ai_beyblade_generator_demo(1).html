@@ -1,0 +1,338 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Beyblade Generator Demo</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    padding: 1rem 2rem;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border-bottom: 2px solid #444;
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+    background: #181818;
+  }
+  main {
+    max-width: 900px;
+    width: 100%;
+    padding: 1rem 2rem 2rem 2rem;
+  }
+  label {
+    display: block;
+    margin: 0.8rem 0 0.2rem 0;
+    font-weight: 600;
+  }
+  select, input[type=text], input[type=range], input[type=number] {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.3rem 0.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    margin-bottom: 0.8rem;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 8px;
+    background: #333;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    background: #00ccff;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  input[type=file] {
+    color: #eee;
+    margin-bottom: 1rem;
+  }
+  button {
+    background: #00ccff;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.3rem 0.3rem 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #121212;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #0099cc;
+  }
+  .flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .output {
+    background: #222;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    white-space: pre-wrap;
+    font-family: monospace;
+    max-height: 350px;
+    overflow-y: auto;
+  }
+  footer {
+    margin-top: auto;
+    padding: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    width: 100%;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<header>AI 3D Beyblade Generator Demo</header>
+<main>
+  <label><strong>Select Mode:</strong></label>
+  <select id="modeSelect">
+    <option value="drawing">Mode 1: Drawing-to-Beyblade</option>
+    <option value="concept">Mode 2: Concept Image-to-Beyblade</option>
+  </select>
+
+  <div id="uploadSection">
+    <label id="uploadLabel">Upload Drawing (Mode 1):</label>
+    <input type="file" id="imageUpload" accept="image/*" />
+  </div>
+
+  <label for="systemSelect"><strong>Select Beyblade Generation & System:</strong></label>
+  <select id="systemSelect">
+    <option value="burst">Burst System</option>
+    <option value="metalfight">Metal Fight System</option>
+    <option value="beybladeX" selected>Beyblade X System</option>
+    <option value="plasticgen">Plastic Gen System</option>
+    <option value="spingear">Spin Gear System</option>
+  </select>
+
+  <label for="contactPoints">Select Contact Point Number:</label>
+  <select id="contactPoints">
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5" selected>5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="random">Random</option>
+  </select>
+
+  <label for="bladeType">Select Blade Type:</label>
+  <select id="bladeType">
+    <option value="Attack">Attack</option>
+    <option value="Defense">Defense</option>
+    <option value="Stamina">Stamina</option>
+    <option value="Balance" selected>Balance</option>
+    <option value="Random">Random</option>
+  </select>
+
+  <label for="spinDir">Select Spin Direction:</label>
+  <select id="spinDir">
+    <option value="Left">Left</option>
+    <option value="Right" selected>Right</option>
+    <option value="Random">Random</option>
+  </select>
+
+  <label for="motifInput">Enter General Motif:</label>
+  <input type="text" id="motifInput" placeholder="e.g. Dragon, Meteor, Candy..." />
+
+  <label for="weightRange">Desired Weight (grams): <span id="weightVal">25</span>g</label>
+  <input type="range" id="weightRange" min="10" max="45" value="25" />
+
+  <label for="heightRange">Desired Height (mm): <span id="heightVal">15</span>mm</label>
+  <input type="range" id="heightRange" min="5" max="25" value="15" />
+
+  <div class="flex-row">
+    <button id="randomizeBtn">Randomize All</button>
+    <button id="generateBtn">Generate Beyblade</button>
+  </div>
+
+  <div class="output" id="outputArea">Your generated Beyblade profile will appear here.</div>
+</main>
+<footer>© 2025 AI Beyblade Generator Demo by ChatGPT</footer>
+
+<script>
+  const modeSelect = document.getElementById('modeSelect');
+  const uploadLabel = document.getElementById('uploadLabel');
+  const imageUpload = document.getElementById('imageUpload');
+
+  const systemSelect = document.getElementById('systemSelect');
+  const contactPoints = document.getElementById('contactPoints');
+  const bladeType = document.getElementById('bladeType');
+  const spinDir = document.getElementById('spinDir');
+  const motifInput = document.getElementById('motifInput');
+  const weightRange = document.getElementById('weightRange');
+  const heightRange = document.getElementById('heightRange');
+
+  const weightVal = document.getElementById('weightVal');
+  const heightVal = document.getElementById('heightVal');
+
+  const randomizeBtn = document.getElementById('randomizeBtn');
+  const generateBtn = document.getElementById('generateBtn');
+  const outputArea = document.getElementById('outputArea');
+
+  function updateSliders() {
+    weightVal.textContent = weightRange.value;
+    heightVal.textContent = heightRange.value;
+  }
+
+  weightRange.addEventListener('input', updateSliders);
+  heightRange.addEventListener('input', updateSliders);
+
+  modeSelect.addEventListener('change', () => {
+    if (modeSelect.value === 'drawing') {
+      uploadLabel.textContent = 'Upload Drawing (Mode 1):';
+      imageUpload.accept = 'image/*';
+    } else {
+      uploadLabel.textContent = 'Upload Concept Image (Mode 2):';
+      imageUpload.accept = 'image/*';
+    }
+    imageUpload.value = '';
+  });
+
+  const bladeTypes = ['Attack', 'Defense', 'Stamina', 'Balance'];
+  const spinDirections = ['Left', 'Right'];
+  const systems = {
+    burst: 'Burst System',
+    metalfight: 'Metal Fight System',
+    beybladeX: 'Beyblade X System',
+    plasticgen: 'Plastic Gen System',
+    spingear: 'Spin Gear System'
+  };
+
+  // Helper function for random selection
+  function randomFromArray(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // Generate a random motif word
+  function randomMotif() {
+    const motifs = ['Dragon', 'Phoenix', 'Tiger', 'Meteor', 'Shadow', 'Knight', 'Wolf', 'Storm', 'Blaze', 'Vortex', 'Fang', 'Ice', 'Thunder', 'Crystal', 'Nova'];
+    return randomFromArray(motifs);
+  }
+
+  // Generate a random Beyblade name based on motif and system
+  function generateName(motif, system) {
+    const suffixes = ['-X', '-Vortex', '-Blade', '-Strike', '-Nova', '-Fang', '-Storm', '-Gear', '-Rush', '-Core'];
+    const sysSuffix = {
+      burst: 'Burst',
+      metalfight: 'Metal',
+      beybladeX: 'X',
+      plasticgen: 'PG',
+      spingear: 'Spin'
+    };
+    return `${motif}${randomFromArray(suffixes)} (${systems[system] || 'Custom System'})`;
+  }
+
+  // Randomize all inputs
+  function randomizeAll() {
+    systemSelect.value = randomFromArray(Object.keys(systems));
+    contactPoints.value = randomFromArray(['3','4','5','6','7']);
+    bladeType.value = randomFromArray([...bladeTypes, 'Random']);
+    spinDir.value = randomFromArray([...spinDirections, 'Random']);
+    motifInput.value = randomMotif();
+    weightRange.value = Math.floor(Math.random() * (45 - 10 + 1)) + 10;
+    heightRange.value = Math.floor(Math.random() * (25 - 5 + 1)) + 5;
+    updateSliders();
+  }
+
+  // Generate Beyblade profile text
+  function generateBeybladeProfile() {
+    // Use or randomize inputs if set to Random
+    let system = systemSelect.value;
+    let contact = contactPoints.value === 'random' ? randomFromArray(['3','4','5','6','7']) : contactPoints.value;
+    let blade = bladeType.value === 'Random' ? randomFromArray(bladeTypes) : bladeType.value;
+    let spin = spinDir.value === 'Random' ? randomFromArray(spinDirections) : spinDir.value;
+    let motif = motifInput.value.trim() || randomMotif();
+    let weight = weightRange.value;
+    let height = heightRange.value;
+    let mode = modeSelect.value === 'drawing' ? 'Drawing-to-Beyblade Mode' : 'Concept Image-to-Beyblade Mode';
+
+    let name = generateName(motif, system);
+
+    // Simulate AI description
+    let description = `=== Generated Beyblade Profile ===
+
+` +
+                      `Mode: ${mode}
+` +
+                      `System: ${systems[system] || 'Custom System'}
+` +
+                      `Name: ${name}
+` +
+                      `Motif: ${motif}
+` +
+                      `Blade Type: ${blade}
+` +
+                      `Contact Points: ${contact}
+` +
+                      `Spin Direction: ${spin}
+` +
+                      `Weight: ${weight}g
+` +
+                      `Height: ${height}mm
+
+` +
+                      `Description:
+` +
+                      `This Beyblade features a ${motif.toLowerCase()}-inspired design with a ${blade.toLowerCase()}-type performance. ` +
+                      `It has ${contact} contact points for optimal battle engagement and spins ${spin.toLowerCase()}. ` +
+                      `Its weight of ${weight} grams and height of ${height} millimeters are balanced for intense stadium battles.
+
+` +
+                      `Special Ability:
+` +
+                      `${motif} Surge — Boosts spin speed temporarily when struck, unleashing devastating combos.
+
+` +
+                      `Recommended Parts Combo:
+` +
+                      `${name.split(' ')[0]} Blade + ${blade} Ratchet + ${contact}-Point Bit
+
+` +
+                      `(Note: 3D model generation and image AI processing are coming soon!)`;
+
+    outputArea.textContent = description;
+  }
+
+  randomizeBtn.addEventListener('click', () => {
+    randomizeAll();
+    outputArea.textContent = 'Randomized fields! Now press "Generate Beyblade" to create your profile.';
+  });
+
+  generateBtn.addEventListener('click', () => {
+    if (modeSelect.value === 'drawing' && imageUpload.files.length === 0) {
+      alert('Please upload a drawing image for Mode 1.');
+      return;
+    }
+    if (modeSelect.value === 'concept' && imageUpload.files.length === 0) {
+      alert('Please upload a concept image for Mode 2.');
+      return;
+    }
+    generateBeybladeProfile();
+  });
+
+  // Initialize sliders display
+  updateSliders();
+</script>
+</body>
+</html>
